@@ -1,0 +1,9 @@
+DROP VIEW shopping_list;
+DROP TABLE meal_ingredients;
+DROP TABLE meals;
+DROP TABLE pantry_items;
+DROP TABLE workout_sessions;
+DROP TABLE equipment;
+DROP TABLE exercises;
+DROP TABLE gyms;
+DROP TABLE users;
