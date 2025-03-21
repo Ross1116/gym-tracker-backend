@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Gym struct {
 	ID        int       `json:"id"`

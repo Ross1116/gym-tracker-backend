@@ -16,10 +16,17 @@ func SetupGymRoutes(db *sql.DB, router *gin.Engine) {
 		gym.POST("", func(c *gin.Context) {
 			handlers.HandleCreateGym(db, c)
 		})
-		gym.GET("/:id", func(c *gin.Context) {
+		gym.GET("/id/:id", func(c *gin.Context) {
 			handlers.HandleGetGymByID(db, c)
 		})
-		gym.PUT("/:id")
-		gym.DELETE("/:id")
+		gym.GET("/user/:user_id", func(c *gin.Context) {
+			handlers.HandleGetGymsByUserID(db, c)
+		})
+		gym.PUT("/:id", func(c *gin.Context) {
+			handlers.HandleUpdateGym(db, c)
+		})
+		gym.DELETE("/:id", func(c *gin.Context) {
+			handlers.HandleDeleteGym(db, c)
+		})
 	}
 }
