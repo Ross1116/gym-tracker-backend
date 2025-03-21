@@ -21,24 +21,40 @@ CREATE TABLE IF NOT EXISTS exercises (
     name VARCHAR(255) UNIQUE NOT NULL  -- e.g., "Bench Press", "Squat"
 );
 
--- Gym Equipment table
-CREATE TABLE IF NOT EXISTS equipment (
+-- Equipment Types table (global list)
+CREATE TABLE IF NOT EXISTS equipment_types (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL  -- e.g., "Barbell", "Dumbbell"
+);
+
+-- Gym Equipment table (instances of equipment in specific gyms)
+CREATE TABLE IF NOT EXISTS gym_equipment (
     id SERIAL PRIMARY KEY,
     gym_id INTEGER REFERENCES gyms(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,  -- e.g., "Barbell", "Dumbbell"
-    UNIQUE(gym_id, name)
+    equipment_type_id INTEGER REFERENCES equipment_types(id),
+    weight DECIMAL NULL,  -- Optional weight of the equipment (NULL if not applicable)
+    notes VARCHAR(255) NULL,  -- Optional additional information
+    UNIQUE(gym_id, equipment_type_id, weight)  -- Allow same equipment type with different weights
 );
 
 -- Workout Sessions
 CREATE TABLE IF NOT EXISTS workout_sessions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    gym_id INTEGER REFERENCES gyms(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Workout Exercises (details of each exercise in a session)
+CREATE TABLE IF NOT EXISTS workout_exercises (
+    id SERIAL PRIMARY KEY,
+    workout_session_id INTEGER REFERENCES workout_sessions(id) ON DELETE CASCADE,
     exercise_id INTEGER REFERENCES exercises(id),
-    equipment_id INTEGER REFERENCES equipment(id),
-    weight DECIMAL NOT NULL,  -- in kg/lbs
+    gym_equipment_id INTEGER REFERENCES gym_equipment(id),
+    weight DECIMAL NOT NULL,  -- Weight used for this specific workout
     reps INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    sets INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Pantry Items

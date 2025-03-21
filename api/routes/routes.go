@@ -10,6 +10,7 @@ func SetupRoutes(db *sql.DB) {
 	router := gin.Default()
 
 	SetupGymRoutes(db, router)
+	SetupEquipmentRoutes(db, router)
 
 	router.Run(":8080")
 }
