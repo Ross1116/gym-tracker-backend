@@ -51,3 +51,8 @@ type WorkoutExerciseWithDetails struct {
 	Sets             int       `json:"sets"`
 	CreatedAt        time.Time `json:"created_at"`
 }
+
+type WorkoutSessionWithExercisesInput struct {
+	GymID     int                    `json:"gym_id" binding:"required"`
+	Exercises []WorkoutExerciseInput `json:"exercises" binding:"required"`
+}
