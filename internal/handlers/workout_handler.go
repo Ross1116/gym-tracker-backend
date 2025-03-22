@@ -10,6 +10,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandleGetUserWorkouts godoc
+// @Summary Get workouts for a user
+// @Description Retrieve all workout sessions for a specific user
+// @Tags Workouts
+// @Accept json
+// @Produce json
+// @Param user_id query int true "ID of the user"
+// @Success 200 {array} models.WorkoutSession
+// @Failure 400 {object} models.ErrorResponse "User ID is required"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /workouts [get]
 func HandleGetUserWorkouts(db *sql.DB, c *gin.Context) {
 	userID := c.Query("user_id")
 	if userID == "" {
@@ -58,6 +69,19 @@ func HandleGetUserWorkouts(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, workouts)
 }
 
+// HandleGetExerciseHistory godoc
+// @Summary Get exercise history
+// @Description Retrieve history of a specific exercise with a specific equipment for a user
+// @Tags Workouts
+// @Accept json
+// @Produce json
+// @Param exercise_id path int true "ID of the exercise"
+// @Param equipment_id path int true "ID of the equipment"
+// @Param user_id query int true "ID of the user"
+// @Success 200 {array} models.WorkoutExerciseWithDetails
+// @Failure 400 {object} models.ErrorResponse "User ID is required"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /exercises/{exercise_id}/equipment/{equipment_id}/history [get]
 func HandleGetExerciseHistory(db *sql.DB, c *gin.Context) {
 	exerciseID := c.Param("exercise_id")
 	equipmentID := c.Param("equipment_id")
@@ -128,6 +152,20 @@ func HandleGetExerciseHistory(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, history)
 }
 
+// HandleGetLatestExercise godoc
+// @Summary Get latest exercise
+// @Description Retrieve the most recent record of a specific exercise with specific equipment for a user
+// @Tags Workouts
+// @Accept json
+// @Produce json
+// @Param exercise_id path int true "ID of the exercise"
+// @Param equipment_id path int true "ID of the equipment"
+// @Param user_id query int true "ID of the user"
+// @Success 200 {object} models.WorkoutExerciseWithDetails
+// @Failure 400 {object} models.ErrorResponse "User ID is required"
+// @Failure 404 {object} models.ErrorResponse "No previous workout found for this exercise and equipment"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /exercises/{exercise_id}/equipment/{equipment_id}/latest [get]
 func HandleGetLatestExercise(db *sql.DB, c *gin.Context) {
 	exerciseID := c.Param("exercise_id")
 	equipmentID := c.Param("equipment_id")
@@ -187,6 +225,19 @@ func HandleGetLatestExercise(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, exercise)
 }
 
+// HandleGetWorkoutWithExercises godoc
+// @Summary Get workout with exercises
+// @Description Retrieve a workout session with all its exercises
+// @Tags Workouts
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the workout"
+// @Param user_id query int true "ID of the user"
+// @Success 200 {object} models.WorkoutSessionWithExercises
+// @Failure 400 {object} models.ErrorResponse "Invalid workout ID format or user ID is required"
+// @Failure 404 {object} models.ErrorResponse "Workout not found or not authorized"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /workouts/{id} [get]
 func HandleGetWorkoutWithExercises(db *sql.DB, c *gin.Context) {
 	workoutIDStr := c.Param("id")
 	workoutID, err := strconv.Atoi(workoutIDStr)
@@ -282,6 +333,18 @@ func HandleGetWorkoutWithExercises(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, result)
 }
 
+// HandleCreateWorkout godoc
+// @Summary Create workout
+// @Description Create a new workout session
+// @Tags Workouts
+// @Accept json
+// @Produce json
+// @Param user_id query int true "ID of the user"
+// @Param workout body models.WorkoutSessionInput true "Workout details"
+// @Success 201 {object} models.WorkoutSession
+// @Failure 400 {object} models.ErrorResponse "User ID is required or invalid input"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /workouts [post]
 func HandleCreateWorkout(db *sql.DB, c *gin.Context) {
 	userID := c.Query("user_id")
 	if userID == "" {
@@ -334,6 +397,18 @@ func HandleCreateWorkout(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, createdWorkout)
 }
 
+// HandleCreateWorkoutWithExercises godoc
+// @Summary Create workout with exercises
+// @Description Create a new workout session with exercises
+// @Tags Workouts
+// @Accept json
+// @Produce json
+// @Param user_id query int true "ID of the user"
+// @Param workout body models.WorkoutSessionWithExercisesInput true "Workout with exercises details"
+// @Success 201 {object} models.WorkoutSessionWithExercises
+// @Failure 400 {object} models.ErrorResponse "User ID is required or invalid input"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /workouts/with-exercises [post]
 func HandleCreateWorkoutWithExercises(db *sql.DB, c *gin.Context) {
 	userID := c.Query("user_id")
 	if userID == "" {
@@ -440,6 +515,18 @@ func HandleCreateWorkoutWithExercises(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, createdWorkout)
 }
 
+// HandleAddWorkoutExercise godoc
+// @Summary Add exercise to workout
+// @Description Add a new exercise to an existing workout session
+// @Tags Workouts
+// @Accept json
+// @Produce json
+// @Param sessionId path int true "ID of the workout session"
+// @Param exercise body models.WorkoutExerciseInput true "Exercise details"
+// @Success 201 {object} models.WorkoutExerciseWithDetails
+// @Failure 400 {object} models.ErrorResponse "Invalid workout session ID or invalid input"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /workouts/{sessionId}/exercises [post]
 func HandleAddWorkoutExercise(db *sql.DB, c *gin.Context) {
 	sessionIDStr := c.Param("sessionId")
 	sessionID, err := strconv.Atoi(sessionIDStr)

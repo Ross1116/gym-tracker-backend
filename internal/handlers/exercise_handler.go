@@ -9,6 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandleGetAllExercises godoc
+// @Summary Get all exercises
+// @Description Retrieve a list of all available exercises
+// @Tags Exercises
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.Exercise
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /exercises [get]
 func HandleGetAllExercises(db *sql.DB, c *gin.Context) {
 	rows, err := db.Query("SELECT id, name FROM exercises ORDER BY name")
 	if err != nil {
@@ -35,6 +44,18 @@ func HandleGetAllExercises(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, exercises)
 }
 
+// HandleCreateExercise godoc
+// @Summary Create new exercise
+// @Description Create a new exercise
+// @Tags Exercises
+// @Accept json
+// @Produce json
+// @Param exercise body models.ExerciseInput true "Exercise details"
+// @Success 201 {object} models.Exercise
+// @Failure 400 {object} models.ErrorResponse "Invalid input"
+// @Failure 409 {object} models.ErrorResponse "Exercise with this name already exists"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /exercises [post]
 func HandleCreateExercise(db *sql.DB, c *gin.Context) {
 	var input models.ExerciseInput
 	if err := c.BindJSON(&input); err != nil {
@@ -69,6 +90,20 @@ func HandleCreateExercise(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newExercise)
 }
 
+// HandleUpdateExercise godoc
+// @Summary Update exercise
+// @Description Update an existing exercise
+// @Tags Exercises
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the exercise to update"
+// @Param exercise body models.ExerciseInput true "Updated exercise details"
+// @Success 200 {object} models.Exercise
+// @Failure 400 {object} models.ErrorResponse "Invalid ID format or invalid input"
+// @Failure 404 {object} models.ErrorResponse "Exercise not found"
+// @Failure 409 {object} models.ErrorResponse "Exercise with this name already exists"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /exercises/{id} [put]
 func HandleUpdateExercise(db *sql.DB, c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -120,6 +155,19 @@ func HandleUpdateExercise(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, updatedExercise)
 }
 
+// HandleDeleteExercise godoc
+// @Summary Delete exercise
+// @Description Delete an existing exercise
+// @Tags Exercises
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the exercise to delete"
+// @Success 200 {object} models.SuccessResponse "Exercise deleted successfully"
+// @Failure 400 {object} models.ErrorResponse "Invalid ID format"
+// @Failure 404 {object} models.ErrorResponse "Exercise not found"
+// @Failure 409 {object} models.ErrorResponse "Cannot delete exercise that is used in workouts"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /exercises/{id} [delete]
 func HandleDeleteExercise(db *sql.DB, c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

@@ -8,6 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandleGetGyms godoc
+// @Summary Get all gyms
+// @Description Retrieve a list of all gyms
+// @Tags Gyms
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.Gym
+// @Failure 500 {object} models.ErrorResponse "Error fetching data"
+// @Router /gyms [get]
 func HandleGetGyms(db *sql.DB, c *gin.Context) {
 	rows, err := db.Query("SELECT id, user_id, name, created_at FROM gyms")
 	if err != nil {
@@ -29,6 +38,17 @@ func HandleGetGyms(db *sql.DB, c *gin.Context) {
 	c.JSON(http.StatusOK, gyms)
 }
 
+// HandleCreateGym godoc
+// @Summary Create new gym
+// @Description Create a new gym
+// @Tags Gyms
+// @Accept json
+// @Produce json
+// @Param gym body models.Gym true "Gym details"
+// @Success 201 {object} models.Gym
+// @Failure 400 {object} models.ErrorResponse "Invalid input or gym name is required"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /gyms [post]
 func HandleCreateGym(db *sql.DB, c *gin.Context) {
 	var gym models.Gym
 	if err := c.BindJSON(&gym); err != nil {
@@ -51,6 +71,17 @@ func HandleCreateGym(db *sql.DB, c *gin.Context) {
 	c.JSON(http.StatusCreated, gym)
 }
 
+// HandleGetGymByID godoc
+// @Summary Get gym by ID
+// @Description Retrieve a specific gym by its ID
+// @Tags Gyms
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the gym"
+// @Success 200 {object} models.Gym
+// @Failure 404 {object} models.ErrorResponse "Gym not found"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /gyms/{id} [get]
 func HandleGetGymByID(db *sql.DB, c *gin.Context) {
 	id := c.Param("id")
 
@@ -70,6 +101,17 @@ func HandleGetGymByID(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gym)
 }
 
+// HandleGetGymsByUserID godoc
+// @Summary Get gyms by user ID
+// @Description Retrieve all gyms belonging to a specific user
+// @Tags Gyms
+// @Accept json
+// @Produce json
+// @Param user_id path int true "ID of the user"
+// @Success 200 {array} models.Gym
+// @Failure 404 {object} models.ErrorResponse "No gyms found for this user"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /users/{user_id}/gyms [get]
 func HandleGetGymsByUserID(db *sql.DB, c *gin.Context) {
 	id := c.Param("user_id")
 
@@ -104,6 +146,19 @@ func HandleGetGymsByUserID(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gyms)
 }
 
+// HandleUpdateGym godoc
+// @Summary Update gym
+// @Description Update an existing gym
+// @Tags Gyms
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the gym to update"
+// @Param gym body models.Gym true "Updated gym details"
+// @Success 200 {object} models.Gym
+// @Failure 400 {object} models.ErrorResponse "Invalid input"
+// @Failure 404 {object} models.ErrorResponse "Gym not found"
+// @Failure 500 {object} models.ErrorResponse "Failed to update gym"
+// @Router /gyms/{id} [put]
 func HandleUpdateGym(db *sql.DB, c *gin.Context) {
 	id := c.Param("id")
 
@@ -126,6 +181,17 @@ func HandleUpdateGym(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gym)
 }
 
+// HandleDeleteGym godoc
+// @Summary Delete gym
+// @Description Delete an existing gym
+// @Tags Gyms
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the gym to delete"
+// @Success 200 {string} string "Deleted gym successfully"
+// @Failure 404 {object} models.ErrorResponse "Gym not found"
+// @Failure 500 {object} models.ErrorResponse "Failed to delete gym"
+// @Router /gyms/{id} [delete]
 func HandleDeleteGym(db *sql.DB, c *gin.Context) {
 	id := c.Param("id")
 

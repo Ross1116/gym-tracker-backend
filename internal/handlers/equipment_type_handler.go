@@ -9,6 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandleGetAllEquipmentTypes godoc
+// @Summary Get all equipment types
+// @Description Retrieve a list of all available equipment types
+// @Tags EquipmentTypes
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.EquipmentType
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /equipment-types [get]
 func HandleGetAllEquipmentTypes(db *sql.DB, c *gin.Context) {
 	rows, err := db.Query("SELECT id, name FROM equipment_types ORDER BY name")
 	if err != nil {
@@ -30,6 +39,18 @@ func HandleGetAllEquipmentTypes(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, equipmentTypes)
 }
 
+// HandleGetEquipmentType godoc
+// @Summary Get equipment type by ID
+// @Description Retrieve a specific equipment type by its ID
+// @Tags EquipmentTypes
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the equipment type"
+// @Success 200 {object} models.EquipmentType
+// @Failure 400 {object} models.ErrorResponse "Invalid ID format"
+// @Failure 404 {object} models.ErrorResponse "Equipment type not found"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /equipment-types/{id} [get]
 func HandleGetEquipmentType(db *sql.DB, c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -52,6 +73,18 @@ func HandleGetEquipmentType(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, equipmentType)
 }
 
+// HandleCreateEquipmentType godoc
+// @Summary Create new equipment type
+// @Description Create a new equipment type
+// @Tags EquipmentTypes
+// @Accept json
+// @Produce json
+// @Param equipment body models.EquipmentTypeInput true "Equipment type details"
+// @Success 201 {object} models.EquipmentType
+// @Failure 400 {object} models.ErrorResponse "Invalid input"
+// @Failure 409 {object} models.ErrorResponse "Equipment type with this name already exists"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /equipment-types [post]
 func HandleCreateEquipmentType(db *sql.DB, c *gin.Context) {
 	var input models.EquipmentTypeInput
 	if err := c.BindJSON(&input); err != nil {
@@ -88,6 +121,20 @@ func HandleCreateEquipmentType(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newEquipmentType)
 }
 
+// HandleUpdateEquipmentType godoc
+// @Summary Update equipment type
+// @Description Update an existing equipment type
+// @Tags EquipmentTypes
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the equipment type to update"
+// @Param equipment body models.EquipmentTypeInput true "Updated equipment type details"
+// @Success 200 {object} models.EquipmentType
+// @Failure 400 {object} models.ErrorResponse "Invalid ID format or invalid input"
+// @Failure 404 {object} models.ErrorResponse "Equipment type not found"
+// @Failure 409 {object} models.ErrorResponse "Equipment type with this name already exists"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /equipment-types/{id} [put]
 func HandleUpdateEquipmentType(db *sql.DB, c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -139,6 +186,19 @@ func HandleUpdateEquipmentType(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, updatedEquipmentType)
 }
 
+// HandleDeleteEquipmentType godoc
+// @Summary Delete equipment type
+// @Description Delete an existing equipment type
+// @Tags EquipmentTypes
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the equipment type to delete"
+// @Success 200 {object} models.SuccessResponse "Equipment type deleted successfully"
+// @Failure 400 {object} models.ErrorResponse "Invalid ID format"
+// @Failure 404 {object} models.ErrorResponse "Equipment type not found"
+// @Failure 409 {object} models.ErrorResponse "Cannot delete equipment type that is in use"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /equipment-types/{id} [delete]
 func HandleDeleteEquipmentType(db *sql.DB, c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

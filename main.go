@@ -10,6 +10,21 @@ import (
 
 var db *sql.DB
 
+// @title Gym Tracker API
+// @version 1.0
+// @description API for tracking gym workouts and exercises
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.example.com/support
+// @contact.email support@example.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:9000
+// @BasePath /api/
+// @schemes http
 func main() {
 	var err error
 	connStr := "host=localhost port=5432 user=admin password=admin dbname=mydb sslmode=disable"

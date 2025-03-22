@@ -9,6 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandleGetAllGymEquipments godoc
+// @Summary Get all equipment for a specific gym
+// @Description Retrieve all equipment items associated with a gym
+// @Tags GymEquipment
+// @Accept json
+// @Produce json
+// @Param gymId path int true "ID of the gym"
+// @Success 200 {array} models.GymEquipmentWithDetails
+// @Failure 404 {object} models.ErrorResponse "No equipments found for this gym"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /gyms/{gymId}/equipment [get]
 func HandleGetAllGymEquipments(db *sql.DB, c *gin.Context) {
 	gymID := c.Param("gymId")
 
@@ -61,6 +72,18 @@ func HandleGetAllGymEquipments(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, equipments)
 }
 
+// HandleAddNewGymEquipment godoc
+// @Summary Add new equipment to a gym
+// @Description Add a new equipment item to a specific gym
+// @Tags GymEquipment
+// @Accept json
+// @Produce json
+// @Param gymId path int true "ID of the gym"
+// @Param equipment body models.GymEquipmentInput true "Equipment details"
+// @Success 201 {object} models.GymEquipment
+// @Failure 400 {object} models.ErrorResponse "Invalid gym ID format or invalid input"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /gyms/{gymId}/equipment [post]
 func HandleAddNewGymEquipment(db *sql.DB, c *gin.Context) {
 	gymId := c.Param("gymId")
 
@@ -106,6 +129,18 @@ func HandleAddNewGymEquipment(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newEquipment)
 }
 
+// HandleGetGymEquipment godoc
+// @Summary Get specific gym equipment by ID
+// @Description Retrieve details of a specific gym equipment item
+// @Tags GymEquipment
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the equipment"
+// @Success 200 {object} models.GymEquipmentWithDetails
+// @Failure 400 {object} models.ErrorResponse "Invalid equipment ID format"
+// @Failure 404 {object} models.ErrorResponse "Equipment not found"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /equipment/{id} [get]
 func HandleGetGymEquipment(db *sql.DB, c *gin.Context) {
 	id := c.Param("id")
 
@@ -149,6 +184,19 @@ func HandleGetGymEquipment(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, equipment)
 }
 
+// HandleUpdateGymEquipment godoc
+// @Summary Update gym equipment
+// @Description Update the details of an existing gym equipment item
+// @Tags GymEquipment
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the equipment to update"
+// @Param equipment body models.GymEquipmentInput true "Updated equipment details"
+// @Success 200 {object} models.GymEquipmentWithDetails
+// @Failure 400 {object} models.ErrorResponse "Invalid equipment ID format, invalid input, or equipment type not found"
+// @Failure 404 {object} models.ErrorResponse "Equipment not found"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /equipment/{id} [put]
 func HandleUpdateGymEquipment(db *sql.DB, c *gin.Context) {
 	id := c.Param("id")
 
@@ -239,6 +287,19 @@ func HandleUpdateGymEquipment(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, updatedEquipment)
 }
 
+// HandleDeleteGymEquipment godoc
+// @Summary Delete gym equipment
+// @Description Delete an existing gym equipment item
+// @Tags GymEquipment
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the equipment to delete"
+// @Success 200 {object} models.SuccessResponse "Equipment successfully deleted"
+// @Failure 400 {object} models.ErrorResponse "Invalid equipment ID format"
+// @Failure 404 {object} models.ErrorResponse "Equipment not found"
+// @Failure 409 {object} models.ErrorResponse "Cannot delete equipment that is in use"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /equipment/{id} [delete]
 func HandleDeleteGymEquipment(db *sql.DB, c *gin.Context) {
 	id := c.Param("id")
 
