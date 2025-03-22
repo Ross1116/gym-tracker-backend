@@ -44,7 +44,7 @@ func HandleCreateGym(db *sql.DB, c *gin.Context) {
 	query := "INSERT INTO gyms (user_id, name) VALUES ($1, $2) RETURNING id, created_at"
 	err := db.QueryRow(query, gym.UserID, gym.Name).Scan(&gym.ID, &gym.CreatedAt)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to create gym"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
