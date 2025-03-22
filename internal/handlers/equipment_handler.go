@@ -106,8 +106,181 @@ func HandleAddNewGymEquipment(db *sql.DB, c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newEquipment)
 }
 
-func HandleGetGymEquipment(db *sql.DB, c *gin.Context) {}
+func HandleGetGymEquipment(db *sql.DB, c *gin.Context) {
+	id := c.Param("id")
 
-func HandleUpdateGymEquipment(db *sql.DB, c *gin.Context) {}
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid equipment ID format"})
+		return
+	}
 
-func HandleDeleteGymEquipment(db *sql.DB, c *gin.Context) {}
+	query := `
+			SELECT 
+					ge.id, 
+					ge.gym_id, 
+					ge.equipment_type_id, 
+					et.name AS equipment_name,
+					ge.weight,
+					ge.notes
+			FROM gym_equipment ge
+			JOIN equipment_types et ON ge.equipment_type_id = et.id
+			WHERE ge.id = $1
+	`
+
+	var equipment models.GymEquipmentWithDetails
+	err = db.QueryRow(query, idInt).Scan(
+		&equipment.ID,
+		&equipment.GymID,
+		&equipment.EquipmentTypeID,
+		&equipment.EquipmentName,
+		&equipment.Weight,
+		&equipment.Notes,
+	)
+
+	if err == sql.ErrNoRows {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Equipment not found"})
+		return
+	} else if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, equipment)
+}
+
+func HandleUpdateGymEquipment(db *sql.DB, c *gin.Context) {
+	id := c.Param("id")
+
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid equipment ID format"})
+		return
+	}
+
+	var input models.GymEquipmentInput
+	if err := c.BindJSON(&input); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var exists bool
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM gym_equipment WHERE id = $1)", idInt).Scan(&exists)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !exists {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Equipment not found"})
+		return
+	}
+
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM equipment_types WHERE id = $1)", input.EquipmentTypeID).Scan(&exists)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !exists {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Equipment type not found"})
+		return
+	}
+
+	query := `
+			UPDATE gym_equipment 
+			SET equipment_type_id = $1, weight = $2, notes = $3
+			WHERE id = $4
+			RETURNING gym_id
+	`
+
+	var gymID int
+	err = db.QueryRow(
+		query,
+		input.EquipmentTypeID,
+		input.Weight,
+		input.Notes,
+		idInt,
+	).Scan(&gymID)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	detailsQuery := `
+			SELECT 
+					ge.id, 
+					ge.gym_id, 
+					ge.equipment_type_id, 
+					et.name AS equipment_name,
+					ge.weight,
+					ge.notes
+			FROM gym_equipment ge
+			JOIN equipment_types et ON ge.equipment_type_id = et.id
+			WHERE ge.id = $1
+	`
+
+	var updatedEquipment models.GymEquipmentWithDetails
+	err = db.QueryRow(detailsQuery, idInt).Scan(
+		&updatedEquipment.ID,
+		&updatedEquipment.GymID,
+		&updatedEquipment.EquipmentTypeID,
+		&updatedEquipment.EquipmentName,
+		&updatedEquipment.Weight,
+		&updatedEquipment.Notes,
+	)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, updatedEquipment)
+}
+
+func HandleDeleteGymEquipment(db *sql.DB, c *gin.Context) {
+	id := c.Param("id")
+
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid equipment ID format"})
+		return
+	}
+
+	var inUse bool
+	err = db.QueryRow(`
+			SELECT EXISTS(
+					SELECT 1 FROM workout_equipment 
+					WHERE gym_equipment_id = $1
+			)`, idInt).Scan(&inUse)
+
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if inUse {
+		c.IndentedJSON(http.StatusConflict, gin.H{"error": "Cannot delete equipment that is used in workout sessions"})
+		return
+	}
+
+	result, err := db.Exec("DELETE FROM gym_equipment WHERE id = $1", idInt)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if rowsAffected == 0 {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Equipment not found"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "Equipment removed successfully"})
+}
