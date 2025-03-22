@@ -13,6 +13,8 @@ func SetupRoutes(db *sql.DB) {
 	SetupEquipmentRoutes(db, router)
 	SetupUserRoutes(db, router)
 	SetupEquipmentTypeRoutes(db, router)
+	SetupExerciseRoutes(db, router)
+	SetupWorkoutRoutes(db, router)
 
 	router.Run(":9000")
 }
